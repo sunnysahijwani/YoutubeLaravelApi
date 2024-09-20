@@ -7,11 +7,13 @@ use Exception;
 /**
  *  Api Service For Auth
  */
-class AuthService {
+class AuthService
+{
 	protected $client;
 	protected $ytLanguage;
 
-	public function __construct() {
+	public function __construct()
+	{
 		$this->client = new \Google_Client;
 
 		$this->client->setClientId(\Config::get('google-config.client_id'));
@@ -19,14 +21,11 @@ class AuthService {
 		$this->client->setDeveloperKey(\Config::get('google-config.api_key'));
 		$this->client->setRedirectUri(\Config::get('google-config.redirect_url'));
 
-		$this->client->setScopes([
-			'https://www.googleapis.com/auth/youtube',
-		]);
+		$this->client->setScopes(\Config::get('google-config.scopes'));
 
 		$this->client->setAccessType('offline');
 		$this->client->setPrompt('consent');
 		$this->ytLanguage = \Config::get('google.yt_language');
-
 	}
 
 	/**
@@ -34,25 +33,22 @@ class AuthService {
 	 * @param  [type] $code [code for auth]
 	 * @return [type]       [authorization token]
 	 */
-	public function getToken($code) {
+	public function getToken($code)
+	{
 		try {
 
 			$this->client->authenticate($code);
 			$token = $this->client->getAccessToken();
 			return $token;
-
 		} catch (\Google_Service_Exception $e) {
 
 			throw new Exception($e->getMessage(), 1);
-
 		} catch (\Google_Exception $e) {
 
 			throw new Exception($e->getMessage(), 1);
-
 		} catch (Exception $e) {
 
 			throw new Exception($e->getMessage(), 1);
-
 		}
 	}
 
@@ -62,9 +58,9 @@ class AuthService {
 	 * @param  [type] $channelId     [return identifier]
 	 * @return [type]                [auth url to generate]
 	 */
-	public function getLoginUrl($youtube_email, $channelId = null) {
-		try
-		{
+	public function getLoginUrl($youtube_email, $channelId = null)
+	{
+		try {
 			if (!empty($channelId)) {
 				$this->client->setState($channelId);
 			}
@@ -72,27 +68,24 @@ class AuthService {
 			$this->client->setLoginHint($youtube_email);
 			$authUrl = $this->client->createAuthUrl();
 			return $authUrl;
-
 		} catch (\Google_Service_Exception $e) {
 
 			throw new Exception($e->getMessage(), 1);
-
 		} catch (\Google_Exception $e) {
 
 			throw new Exception($e->getMessage(), 1);
-
 		} catch (Exception $e) {
 
 			throw new Exception($e->getMessage(), 1);
 		}
-
 	}
 
 	/**
 	 * [setAccessToken -setting the access token to the client]
 	 * @param [type] $google_token [googel auth token]
 	 */
-	public function setAccessToken($google_token = null) {
+	public function setAccessToken($google_token = null)
+	{
 		try {
 
 			if (!is_null($google_token)) {
@@ -107,15 +100,12 @@ class AuthService {
 			}
 
 			return !$this->client->isAccessTokenExpired();
-
 		} catch (\Google_Service_Exception $e) {
 
 			throw new Exception($e->getMessage(), 1);
-
 		} catch (\Google_Exception $e) {
 
 			throw new Exception($e->getMessage(), 1);
-
 		} catch (Exception $e) {
 
 			throw new Exception($e->getMessage(), 1);
@@ -127,7 +117,8 @@ class AuthService {
 	 * @param  $properties [param properties to be added to channel]
 	 * @return             [resource array]
 	 */
-	public function createResource($properties) {
+	public function createResource($properties)
+	{
 		try {
 
 			$resource = array();
@@ -142,7 +133,6 @@ class AuthService {
 			}
 
 			return $resource;
-
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage(), 1);
 		}
@@ -153,7 +143,8 @@ class AuthService {
 	 * @param &$ref     [using reference of array from createResource to add property to it]
 	 * @param $property [property to be inserted to resource array]
 	 */
-	public function addPropertyToResource(&$ref, $property, $value) {
+	public function addPropertyToResource(&$ref, $property, $value)
+	{
 		try {
 
 			$keys = explode(".", $property);
@@ -179,16 +170,13 @@ class AuthService {
 
 				$ref = $value;
 				$ref = explode(",", $value);
-
 			} elseif ($isArray) {
 
 				$ref = array();
-
 			} else {
 
 				$ref = $value;
 			}
-
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage(), 1);
 		}
@@ -199,7 +187,8 @@ class AuthService {
 	 * @param  $time [youtube returned time format]
 	 * @return       [string parsed time]
 	 */
-	public function parseTime($time) {
+	public function parseTime($time)
+	{
 		$tempTime = str_replace("PT", " ", $time);
 		$tempTime = str_replace('H', " Hours ", $tempTime);
 		$tempTime = str_replace('M', " Minutes ", $tempTime);
@@ -207,5 +196,4 @@ class AuthService {
 
 		return $tempTime;
 	}
-
 }
